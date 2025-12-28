@@ -1,7 +1,7 @@
 #Imports
 from PySide6.QtCore import QObject, Signal, Slot, QThread
-import posture, capture
-from worker import get_frame_posture_value, BackgroundWorker
+import posture
+from worker import get_frame_value, BackgroundWorker
 
 #Handles all communication between main.py and QML
 class QMLController(QObject):
@@ -28,12 +28,8 @@ class QMLController(QObject):
         posture.sensitivity = value / 100
 
     @Slot()
-    def detect_frame(self):
-        return get_frame_posture_value()
-
-    @Slot()
     def set_default_posture_value(self):
-        posture_value = self.detect_frame()
+        posture_value = get_frame_value()
         posture.default_posture_value = posture_value
 
     @Slot()

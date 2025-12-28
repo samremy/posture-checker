@@ -2,7 +2,7 @@ from PySide6.QtCore import QObject, Signal, Slot
 import time
 import capture, posture
 
-def get_frame_posture_value():
+def get_frame_value():
     frame = capture.get_frame()
     timestamp_ms = capture.get_timestamp_ms()
     RGB_frame = capture.get_RGB_frame(frame)
@@ -24,18 +24,14 @@ class BackgroundWorker(QObject):
 
     @Slot()
     def run(self):
-        print("Running main loop")
         while self._running:
-            posture_value = get_frame_posture_value()
-            print("Posture Value: ", posture_value, "Default x Sensitivity: ", posture.default_posture_value * posture.sensitivity)
+            posture_value = get_frame_value()
             if posture_value <= posture.default_posture_value * posture.sensitivity:
-                print("Bad Posture")  # Bad Posture
-                self.postureBad.emit()
+                self.postureBad.emit() # Bad Posture
             else:
-                print("Good Posture")  # Good Posture
-                self.postureGood.emit()
+                self.postureGood.emit() # Good Posture
 
-            time.sleep(1)
+            time.sleep(0.1)
 
         capture.cleanup()
         self.finished.emit()
