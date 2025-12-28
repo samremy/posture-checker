@@ -5,7 +5,6 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2
 
-start_time = 0
 default_posture_value = 0
 sensitivity = 0
 
@@ -14,7 +13,8 @@ options = vision.PoseLandmarkerOptions(base_options=base_options, running_mode=v
 pose_detector = vision.PoseLandmarker.create_from_options(options)
 
 def get_detection_result(mp_frame, timestamp_ms):
-    return pose_detector.detect_for_video(mp_frame, timestamp_ms=timestamp_ms)
+    detection_result = pose_detector.detect_for_video(mp_frame, timestamp_ms=timestamp_ms)
+    return detection_result
 
 def get_mp_frame(rgb_frame):
     mp_frame = mp.Image(
@@ -32,4 +32,6 @@ def get_posture_value(detection_result):
     shoulder_R = wl[11].y
     shoulder_L = wl[12].y
     shoulder_mid = (shoulder_L + shoulder_R) / 2  # Midpoint height
-    return shoulder_mid - nose  # Horizontal Diff
+    posture_value = shoulder_mid - nose # Horizontal Diff
+    print(f"posture_value {posture_value}")
+    return posture_value

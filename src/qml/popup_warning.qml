@@ -14,7 +14,7 @@ Window {
     title: "Posture warning"
     color: "red"
 
-    flags: Qt.Tool | Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
+    flags: Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
 
     x: Screen.virtualX
     y: Screen.virtualY

@@ -22,6 +22,7 @@ Window {
             controller.request_show()
             console.log("Sending sensitivity: " + sensitivitySlider.value.toFixed(0) + "%")
             controller.set_sensitivity(sensitivitySlider.value.toFixed(0))
+            controller.set_default_posture_value()
             console.log("Closing startup")
             close()
         }

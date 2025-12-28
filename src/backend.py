@@ -1,27 +1,19 @@
 #Imports
-from PySide6.QtCore import QObject, Signal, Slot
-
-import numpy as np
-import mediapipe as mp
-from mediapipe.tasks import python
-from mediapipe.tasks.cc.vision import pose_detector
-from mediapipe.tasks.python import vision
-from mediapipe.framework.formats import landmark_pb2
-
-import posture
-import capture
+from PySide6.QtCore import QObject, Signal, Slot, QThread
+import posture, capture
+from worker import get_frame_posture_value, BackgroundWorker
 
 #Handles all communication between main.py and QML
 class QMLController(QObject):
-    endMenu = Signal()
     startProgram = Signal()
+    endMenu = Signal()
     showWindow = Signal()
     hideWindow = Signal()
 
-    @Slot()
-    def request_start(self):
-        self.endMenu.emit()
-        self.startProgram.emit()
+    def __init__(self):
+        super().__init__()
+        self.thread = None
+        self.worker = None
 
     @Slot()
     def request_show(self):
@@ -33,36 +25,34 @@ class QMLController(QObject):
 
     @Slot(int)
     def set_sensitivity(self, value):
-        posture.sensitivity = value
-
-    @Slot(float)
-    def set_default_posture_value(self, value):
-        posture.default_posture_value = value
+        posture.sensitivity = value / 100
 
     @Slot()
     def detect_frame(self):
-        frame = capture.get_frame()
-        if type(frame) == bool:
-            return None
-        timestamp_ms = capture.get_timestamp_ms()
-        RGB_frame = capture.get_RGB_frame(frame)
-        mp_frame = posture.get_mp_frame(RGB_frame)
-        detection_result = posture.get_detection_result(mp_frame, timestamp_ms)
-        return detection_result
+        return get_frame_posture_value()
 
     @Slot()
-    def run_main(self):
-        print("Running main loop")
-        while True:
-            detection_result = self.detect_frame()
-            if not detection_result:
-                break
+    def set_default_posture_value(self):
+        posture_value = self.detect_frame()
+        posture.default_posture_value = posture_value
 
-            posture_value = posture.get_posture_value(detection_result)
-            if posture_value <= posture.default_posture_value * posture.sensitivity:
-                print("Bad Posture")  # Bad Posture
-            else:
-                print("Good Posture")  # Good Posture
+    @Slot()
+    def request_start(self):
+        self.endMenu.emit()
+        self.start_worker()
 
-        capture.cleanup()
+    def start_worker(self):
+        self.thread = QThread()
+        self.worker = BackgroundWorker()
 
+        self.worker.moveToThread(self.thread)
+
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+
+        self.worker.postureBad.connect(self.showWindow)
+        self.worker.postureGood.connect(self.hideWindow)
+
+        self.thread.start()
