@@ -3,10 +3,6 @@ import QtQuick
 import QtQuick.Window
 
 Window {
-    Component.onCompleted: {
-        console.log("Popup created")
-    }
-
     id: popup
     visible: false
     width: 192
@@ -23,18 +19,19 @@ Window {
         target: controller
 
         function onStartProgram() {
-            console.log("Requesting to run main")
             controller.run_main()
         }
 
         function onShowWindow() {
-            console.log("Showing popup")
-            popup.visible = true
+            if (!popup.visible) {
+                popup.visible = true
+            }
         }
 
         function onHideWindow() {
-            console.log("Hiding popup")
-            popup.visible = false
+            if (popup.visible) {
+                popup.visible = false
+            }
         }
     }
 

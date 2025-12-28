@@ -4,10 +4,6 @@ import QtQuick.Window
 import QtQuick.Controls
 
 Window {
-    Component.onCompleted: {
-        console.log("Startup created")
-    }
-
     id: startup
     visible: true
     width: 512
@@ -19,12 +15,9 @@ Window {
         target: controller
 
         function onEndMenu() {
-            controller.request_show()
-            console.log("Sending sensitivity: " + sensitivitySlider.value.toFixed(0) + "%")
             controller.set_sensitivity(sensitivitySlider.value.toFixed(0))
             controller.set_default_posture_value()
-            console.log("Closing startup")
-            close()
+            startup.visible = false
         }
     }
 
@@ -44,7 +37,6 @@ Window {
         }
 
         onClicked: {
-            console.log("Requesting program start")
             controller.request_start()
         }
     }
@@ -66,9 +58,5 @@ Window {
         to: 100.0
         value: 75.0
         stepSize: 1.0
-
-        onValueChanged: {
-            console.log("sensitivity value:", value);
-        }
     }
 }

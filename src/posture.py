@@ -8,8 +8,11 @@ from mediapipe.framework.formats import landmark_pb2
 default_posture_value = 0
 sensitivity = 0
 
-base_options = python.BaseOptions(model_asset_path="../pose_landmarker.task")
-options = vision.PoseLandmarkerOptions(base_options=base_options, running_mode=vision.RunningMode.VIDEO)
+options = vision.PoseLandmarkerOptions(
+    base_options=python.BaseOptions(model_asset_path="../pose_landmarker.task"),
+    running_mode=vision.RunningMode.VIDEO,
+    output_segmentation_masks=False
+)
 pose_detector = vision.PoseLandmarker.create_from_options(options)
 
 def get_detection_result(mp_frame, timestamp_ms):

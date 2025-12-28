@@ -5,9 +5,9 @@ import capture, posture
 def get_frame_value():
     frame = capture.get_frame()
     timestamp_ms = capture.get_timestamp_ms()
-    RGB_frame = capture.get_RGB_frame(frame)
+    rgb_frame = capture.get_rgb_frame(frame)
 
-    mp_frame = posture.get_mp_frame(RGB_frame)
+    mp_frame = posture.get_mp_frame(rgb_frame)
     detection_result = posture.get_detection_result(mp_frame, timestamp_ms)
     posture_value = posture.get_posture_value(detection_result)
 
@@ -35,6 +35,7 @@ class BackgroundWorker(QObject):
 
         capture.cleanup()
         self.finished.emit()
+        self.stop()
 
     @Slot()
     def stop(self):

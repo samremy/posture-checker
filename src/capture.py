@@ -18,9 +18,9 @@ def get_frame():
 def get_timestamp_ms():
     return int((time.monotonic() - start_time) * 1000)
 
-def get_RGB_frame(BGR_frame):
-    RGB_frame = cv2.cvtColor(BGR_frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
-    return RGB_frame
+def get_rgb_frame(bgr_frame):
+    rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+    return rgb_frame
 
 def cleanup():
     cap.release()
