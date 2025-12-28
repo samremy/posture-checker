@@ -2,7 +2,7 @@
 import os
 import sys
 
-from controller import QMLController
+from backend import QMLController
 
 from PySide6.QtCore import QUrl
 from PySide6.QtWidgets import QApplication

@@ -5,7 +5,7 @@ import QtQuick.Controls
 
 Window {
     Component.onCompleted: {
-        console.log("✅ startup created")
+        console.log("Startup created")
     }
 
     id: startup
@@ -17,6 +17,14 @@ Window {
 
     Connections {
         target: controller
+
+        function onEndMenu() {
+            controller.request_show()
+            console.log("Sending sensitivity: " + sensitivitySlider.value.toFixed(0) + "%")
+            controller.set_sensitivity(sensitivitySlider.value.toFixed(0))
+            console.log("Closing startup")
+            close()
+        }
     }
 
     Button {
@@ -35,9 +43,8 @@ Window {
         }
 
         onClicked: {
-            console.log("✅ requesting program start")
+            console.log("Requesting program start")
             controller.request_start()
-            close()
         }
     }
 
