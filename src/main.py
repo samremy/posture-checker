@@ -3,6 +3,7 @@ import os
 import sys
 
 from backend import QMLController
+from image import FrameProvider
 
 from PySide6.QtCore import QUrl
 from PySide6.QtWidgets import QApplication
@@ -16,7 +17,10 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 menu_qml_file_path = os.path.join(script_dir, "qml", "startup_menu.qml")
 popup_qml_file_path = os.path.join(script_dir, "qml", "popup_warning.qml")
 
-controller = QMLController()
+frame_provider = FrameProvider()
+engine.addImageProvider("frames", frame_provider)
+
+controller = QMLController(frame_provider=frame_provider)
 engine.rootContext().setContextProperty("controller", controller)
 
 engine.load(str(menu_qml_file_path))

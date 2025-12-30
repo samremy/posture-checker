@@ -22,6 +22,14 @@ def get_rgb_frame(bgr_frame):
     rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
     return rgb_frame
 
+def get_bgr_frame(rgb_frame):
+    bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
+    return bgr_frame
+
+def draw_frame(frame):
+    cv2.imshow('frame', frame)
+    cv2.waitKey(0)
+
 def cleanup():
     cap.release()
     cv2.destroyAllWindows()

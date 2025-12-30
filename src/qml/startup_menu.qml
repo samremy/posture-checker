@@ -17,7 +17,27 @@ Window {
         function onEndMenu() {
             controller.set_sensitivity(sensitivitySlider.value.toFixed(0))
             controller.set_default_posture_value()
-            startup.visible = false
+            //startup.visible = false
+        }
+
+        function onFrameUpdated() {
+            console.log("frameUpdated received")
+            webcam.source = "image://frames/live?" + Date.now()
+        }
+    }
+
+    Image {
+        id: webcam
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectFit
+        cache: false
+        source: "image://frames/live"
+
+        Timer {
+            interval: 16   // ~60 FPS
+            running: true
+            repeat: true
+            onTriggered: webcam.source = "image://frames/live?" + Date.now()
         }
     }
 
