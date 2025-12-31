@@ -1,5 +1,7 @@
 #Imports
 from PySide6.QtCore import QObject, Signal, Slot, QThread
+from scipy.stats import false_discovery_control
+
 import posture, capture
 from worker import get_capture_frame, get_posture_frame, BackgroundWorker
 
@@ -8,12 +10,15 @@ class QMLController(QObject):
     startProgram = Signal()
     endMenu = Signal()
     frameUpdated = Signal()
-    postureBad = Signal()
     showWindow = Signal()
     hideWindow = Signal()
+    goodPosture = Signal()
+    badPosture = Signal()
 
     def __init__(self, frame_provider):
         super().__init__()
+        self.displaying = True
+        self.detecting = False
         self.thread = None
         self.worker = None
         self.frame_provider = frame_provider
@@ -27,6 +32,19 @@ class QMLController(QObject):
     def request_hide(self):
         self.hideWindow.emit()
 
+    def good_posture(self):
+        if not self.displaying:
+            self.hideWindow.emit()
+        elif self.detecting:
+            self.goodPosture.emit()
+
+    def bad_posture(self):
+        if not self.displaying:
+            self.showWindow.emit()
+        elif self.detecting:
+            self.badPosture.emit()
+
+
     @Slot(object)
     def draw_frame(self, frame):
         capture.draw_frame(frame)
@@ -34,7 +52,6 @@ class QMLController(QObject):
     @Slot(object)
     def update_frame(self, image):
         self.frame_provider.set_image(image)
-        print("Image set, emitting frameUpdated")
         self.frameUpdated.emit()
 
     @Slot(int)
@@ -46,10 +63,17 @@ class QMLController(QObject):
         rgb_frame, timestamp_ms = get_capture_frame()
         posture_value = get_posture_frame(rgb_frame, timestamp_ms)
         posture.default_posture_value = posture_value
+        if not self.detecting:
+            self.detecting = True
+
+    @Slot()
+    def set_detecting(self):
+        self.detecting = True
 
     @Slot()
     def request_start(self):
         self.endMenu.emit()
+        self.displaying = False
 
     def start_worker(self):
         self.thread = QThread()
@@ -62,9 +86,9 @@ class QMLController(QObject):
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
 
-        self.worker.frameReady.connect(self.update_frame) # self.draw_frame
+        self.worker.frameReady.connect(self.update_frame)
 
-        self.worker.postureBad.connect(self.showWindow)
-        self.worker.postureGood.connect(self.hideWindow)
+        self.worker.postureGood.connect(self.good_posture)
+        self.worker.postureBad.connect(self.bad_posture)
 
         self.thread.start()

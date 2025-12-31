@@ -2,6 +2,9 @@ import cv2
 import time
 
 cap = cv2.VideoCapture(0) #0 for default webcam
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
 start_time = time.monotonic()
 
 if not cap.isOpened(): #No webcam handling

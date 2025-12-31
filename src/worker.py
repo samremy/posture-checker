@@ -39,7 +39,6 @@ class BackgroundWorker(QObject):
             annotated_frame = posture.draw_landmarks_on_image(rgb_frame, detection_result)
             #bgr_annotated_frame = capture.get_bgr_frame(annotated_frame)
             qimage = image.get_qimage(annotated_frame)
-            print(f"QImage set: {type(qimage)}, emitting frameReady")
             self.frameReady.emit(qimage)
 
             time.sleep(0.1)
