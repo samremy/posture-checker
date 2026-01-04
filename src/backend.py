@@ -1,7 +1,5 @@
 #Imports
 from PySide6.QtCore import QObject, Signal, Slot, QThread
-from scipy.stats import false_discovery_control
-
 import posture, capture
 from worker import get_capture_frame, get_posture_frame, BackgroundWorker
 
@@ -18,7 +16,7 @@ class QMLController(QObject):
     def __init__(self, frame_provider):
         super().__init__()
         self.displaying = True
-        self.detecting = False
+        self.mode = 0 #Enum: 0 Setup, 1 Detecting, 2 Running
         self.thread = None
         self.worker = None
         self.frame_provider = frame_provider
@@ -35,15 +33,14 @@ class QMLController(QObject):
     def good_posture(self):
         if not self.displaying:
             self.hideWindow.emit()
-        elif self.detecting:
+        elif self.mode != 0:
             self.goodPosture.emit()
 
     def bad_posture(self):
         if not self.displaying:
             self.showWindow.emit()
-        elif self.detecting:
+        elif self.mode != 0:
             self.badPosture.emit()
-
 
     @Slot(object)
     def draw_frame(self, frame):
@@ -51,8 +48,9 @@ class QMLController(QObject):
 
     @Slot(object)
     def update_frame(self, image):
-        self.frame_provider.set_image(image)
-        self.frameUpdated.emit()
+        if self.displaying:
+            self.frame_provider.set_image(image)
+            self.frameUpdated.emit()
 
     @Slot(int)
     def set_sensitivity(self, value):
@@ -63,12 +61,21 @@ class QMLController(QObject):
         rgb_frame, timestamp_ms = get_capture_frame()
         posture_value = get_posture_frame(rgb_frame, timestamp_ms)
         posture.default_posture_value = posture_value
-        if not self.detecting:
-            self.detecting = True
+        if not self.mode == 1:
+            self.mode = 1
+
+    @Slot()
+    def set_displaying(self):
+        self.displaying = True
+        self.hideWindow.emit()
 
     @Slot()
     def set_detecting(self):
-        self.detecting = True
+        self.mode = 1 # Detecting
+
+    @Slot()
+    def set_running(self):
+        self.mode = 2 # Running
 
     @Slot()
     def request_start(self):

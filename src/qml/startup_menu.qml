@@ -13,16 +13,20 @@ Window {
     title: "Startup menu"
     color: "white"
 
+
     Connections {
         target: controller
 
         function onEndMenu() {
             controller.set_sensitivity(sensitivitySlider.value.toFixed(0))
             controller.set_default_posture_value()
-            startup.visible = false
+            startup.visibility = Window.Minimized
         }
 
         function onFrameUpdated() {
+            if (!webcam.frameReady) {
+                webcam.frameReady = true
+            }
             webcam.source = "image://frames/live?" + Date.now()
         }
 
@@ -36,6 +40,12 @@ Window {
             imageBg.color = "red"
             posture.color = "red"
             posture.text = "Bad Posture"
+        }
+    }
+
+    onVisibilityChanged: (vis) => {
+        if (vis === Window.Windowed) {
+            controller.set_displaying()
         }
     }
 
@@ -54,7 +64,8 @@ Window {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             cache: false
-            source: "image://frames/live"
+            property bool frameReady: false
+            source: frameReady ? "image://frames/live" : ""
 
             Timer {
                 interval: 16   // ~60 FPS
@@ -106,7 +117,7 @@ Window {
         x: xBorder
         y: parent.height - (yBorder + height)
         hoverEnabled: true
-        scale: hovered ? 1.08 : 1.0
+        scale: setArea.pressed ? 1 : hovered ? 1.1 : 1
 
         Behavior on scale {
             NumberAnimation {
@@ -128,6 +139,7 @@ Window {
         }
 
         MouseArea {
+            id: setArea
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
@@ -149,7 +161,7 @@ Window {
         x: parent.width - (xBorder + width)
         y: parent.height - (yBorder + height)
         hoverEnabled: true
-        scale: hovered ? 1.08 : 1.0
+        scale: startArea.pressed ? 1 : hovered ? 1.1 : 1
 
         Behavior on scale {
             NumberAnimation {
@@ -172,10 +184,13 @@ Window {
         }
 
         MouseArea {
+            id: startArea
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
+                controller.set_running()
                 controller.request_start()
+                debug.text = "Mode: Running"
             }
         }
     }
@@ -192,8 +207,8 @@ Window {
 
     Slider {
         id: sensitivitySlider
-        width: 12 * xBorder
-        height: yBorder / 4
+        width: xBorder * 12
+        height: yBorder * 2/3
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height - (yBorder*(3/2) + height + sensitivity.height)
         from: 0.0
@@ -203,6 +218,9 @@ Window {
         hoverEnabled: true
 
         background: Rectangle {
+            height: yBorder / 4
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             color: "black"
             radius: 4
         }
@@ -213,32 +231,15 @@ Window {
             height: yBorder * 2/3
             radius: xBorder * 2/3
             color: "black"
+            transformOrigin: Item.Center
 
-            x: sensitivitySlider.leftPadding +
-            sensitivitySlider.visualPosition *
-            (sensitivitySlider.availableWidth - width)
+            scale: sensitivitySlider.pressed ? 1 : sensitivitySlider.hovered ? 1.2 : 1
 
-            y: sensitivitySlider.topPadding +
-            (sensitivitySlider.availableHeight - height) / 2
-
-
-            //scale: sensitivitySlider.pressed ? 0.9 :
-                   //sensitivitySlider.hovered ? 1.15 : 1.0
+            x: sensitivitySlider.visualPosition * (sensitivitySlider.width - width)
+            y: (sensitivitySlider.height - height) / 2
 
             Behavior on scale {
-                NumberAnimation {
-                    duration: 120
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                acceptedButtons: Qt.NoButton
-
-                onEntered: handleRect.scale = 1.2
-                onExited: handleRect.scale = 1.0
+                NumberAnimation { duration: 150; easing.type: Easing.OutQuad }
             }
         }
 

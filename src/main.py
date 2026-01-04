@@ -1,11 +1,9 @@
 #Imports
 import os
+os.environ["QT_QUICK_CONTROLS_STYLE"] = "Basic" # Force non-native style
 import sys
-
 from backend import QMLController
 from image import FrameProvider
-
-from PySide6.QtCore import QUrl
 from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import QQmlApplicationEngine
 

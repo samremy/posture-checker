@@ -1,6 +1,5 @@
 from PySide6.QtQuick import QQuickImageProvider
 from PySide6.QtGui import QImage
-from PySide6.QtCore import Qt
 
 def get_qimage(rgb_frame):
     h, w, ch = rgb_frame.shape
