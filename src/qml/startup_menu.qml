@@ -18,7 +18,6 @@ Window {
         target: controller
 
         function onEndMenu() {
-            controller.set_sensitivity(sensitivitySlider.value.toFixed(0))
             controller.set_default_posture_value()
             startup.visibility = Window.Minimized
         }
@@ -66,13 +65,6 @@ Window {
             cache: false
             property bool frameReady: false
             source: frameReady ? "image://frames/live" : ""
-
-            Timer {
-                interval: 16   // ~60 FPS
-                running: true
-                repeat: true
-                onTriggered: webcam.source = "image://frames/live?" + Date.now()
-            }
         }
     }
 
@@ -144,7 +136,6 @@ Window {
             hoverEnabled: true
             onClicked: {
                 controller.set_default_posture_value()
-                controller.set_sensitivity(sensitivitySlider.value.toFixed(0))
                 controller.set_detecting()
 
                 debug.text = "Mode: Detecting"
