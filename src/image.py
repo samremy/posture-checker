@@ -9,7 +9,7 @@ def get_qimage(rgb_frame):
         h,
         ch * w,
         QImage.Format_RGB888
-    ).copy()  # memory safety
+    ).copy()  #Memory safety
 
 class FrameProvider(QQuickImageProvider):
     def __init__(self):

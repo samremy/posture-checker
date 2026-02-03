@@ -7,6 +7,10 @@ from mediapipe.framework.formats import landmark_pb2
 default_posture_value = 0
 sensitivity = 0
 
+/Users/sambaker/Documents/posture-checker/pose_landmarker.task
+
+
+
 options = vision.PoseLandmarkerOptions(
     base_options=python.BaseOptions(model_asset_path="../pose_landmarker.task"),
     running_mode=vision.RunningMode.VIDEO,
@@ -56,3 +60,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
             mp.solutions.pose.POSE_CONNECTIONS,
             mp.solutions.drawing_styles.get_default_pose_landmarks_style())
     return annotated_image
+
+def cleanup():
+    pose_detector.close()
+

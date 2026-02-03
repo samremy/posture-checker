@@ -1,11 +1,12 @@
 #Imports
-from PySide6.QtCore import QObject, Signal, Slot, QThread
+from PySide6.QtCore import QObject, Signal, Slot, QThread, QCoreApplication
 import posture, capture
 from worker import get_capture_frame, get_posture_frame, BackgroundWorker
 
 #Handles all communication between main.py and QML
 class QMLController(QObject):
     startProgram = Signal()
+    endProgram = Signal()
     endMenu = Signal()
     frameUpdated = Signal()
     showWindow = Signal()
@@ -21,6 +22,7 @@ class QMLController(QObject):
         self.worker = None
         self.frame_provider = frame_provider
         self.start_worker()
+        self._shutting_down = False
 
     @Slot()
     def request_show(self):
@@ -65,6 +67,14 @@ class QMLController(QObject):
             self.mode = 1
 
     @Slot()
+    def check_state(self):
+        if self.mode == 1:
+            self.set_running()
+            self.request_start()
+        elif self.mode == 2:
+            self.request_end()
+
+    @Slot()
     def set_displaying(self):
         self.displaying = True
         self.hideWindow.emit()
@@ -81,6 +91,11 @@ class QMLController(QObject):
     def request_start(self):
         self.endMenu.emit()
         self.displaying = False
+
+    @Slot()
+    def request_end(self):
+        self.endProgram.emit()
+        self.endMenu.emit()
 
     def start_worker(self):
         self.thread = QThread()
@@ -99,3 +114,27 @@ class QMLController(QObject):
         self.worker.postureBad.connect(self.bad_posture)
 
         self.thread.start()
+
+    @Slot()
+    def shutdown(self):
+        if self._shutting_down:
+            return
+        self._shutting_down = True
+
+        if self.worker is not None:
+            try:
+                self.worker.stop()
+            except RuntimeError:
+                pass
+
+        if self.thread is not None:
+            try:
+                self.thread.quit()
+                self.thread.wait()
+            except RuntimeError:
+                pass
+
+        self.worker = None
+        self.thread = None
+
+        QCoreApplication.quit()

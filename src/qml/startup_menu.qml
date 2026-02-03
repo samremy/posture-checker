@@ -5,7 +5,7 @@ import QtQuick.Controls
 
 Window {
     id: startup
-    visible: true
+    visibility: Window.Windowed
     width: 512
     height: 384
     property int xBorder: width/24
@@ -18,8 +18,11 @@ Window {
         target: controller
 
         function onEndMenu() {
-            controller.set_default_posture_value()
             startup.visibility = Window.Minimized
+        }
+
+        function onEndProgram() {
+            controller.shutdown()
         }
 
         function onFrameUpdated() {
@@ -72,7 +75,6 @@ Window {
     Text {
         id: debug
         text: "Mode: Setup"
-        // "Mode: Detecting. Start program
         color: "black"
         font.pixelSize: yBorder * (2/3)
         height: yBorder * (2/3)
@@ -161,12 +163,13 @@ Window {
             }
         }
 
-        contentItem: Text {
+        Text {
+            id: startText
             text: "Start"
             font.pixelSize: yBorder * (2/3)
             color: "white"
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
         }
 
         background: Rectangle {
@@ -179,9 +182,10 @@ Window {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                controller.set_running()
-                controller.request_start()
+                controller.check_state()
                 debug.text = "Mode: Running"
+                tooltip.text = "Click End to close"
+                startText.text = "End"
             }
         }
     }

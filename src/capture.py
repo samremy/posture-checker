@@ -13,20 +13,20 @@ if not cap.isOpened(): #No webcam handling
 
 def get_frame():
     ret, frame = cap.read()
-    if not ret:
+    if not ret: #No webcam found
         print("Error: No webcam found")
-        return None #No webcam found
+        return None
     return frame
 
 def get_timestamp_ms():
     return int((time.monotonic() - start_time) * 1000)
 
 def get_rgb_frame(bgr_frame):
-    rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+    rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)  #Convert BGR to RGB
     return rgb_frame
 
 def get_bgr_frame(rgb_frame):
-    bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
+    bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR) #Convert RGB to BGR
     return bgr_frame
 
 def draw_frame(frame):

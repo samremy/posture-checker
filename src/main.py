@@ -11,9 +11,11 @@ from PySide6.QtQml import QQmlApplicationEngine
 app = QApplication(sys.argv)
 engine = QQmlApplicationEngine()
 
+#Load file paths
 script_dir = os.path.dirname(os.path.abspath(__file__))
 menu_qml_file_path = os.path.join(script_dir, "qml", "startup_menu.qml")
 popup_qml_file_path = os.path.join(script_dir, "qml", "popup_warning.qml")
+
 
 frame_provider = FrameProvider()
 engine.addImageProvider("frames", frame_provider)
@@ -24,7 +26,9 @@ engine.rootContext().setContextProperty("controller", controller)
 engine.load(str(menu_qml_file_path))
 engine.load(str(popup_qml_file_path))
 
+app.aboutToQuit.connect(controller.shutdown)
+
 if not engine.rootObjects():
     sys.exit(-1)
 
-app.exec()
+sys.exit(app.exec())
