@@ -2,17 +2,12 @@ import numpy as np
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from mediapipe.framework.formats import landmark_pb2
 
 default_posture_value = 0
-sensitivity = 0
-
-/Users/sambaker/Documents/posture-checker/pose_landmarker.task
-
-
+sensitivity = 75 / 100
 
 options = vision.PoseLandmarkerOptions(
-    base_options=python.BaseOptions(model_asset_path="../pose_landmarker.task"),
+    base_options=python.BaseOptions(model_asset_path="pose_landmarker.task"),
     running_mode=vision.RunningMode.VIDEO,
     output_segmentation_masks=False
 )
@@ -46,19 +41,18 @@ def draw_landmarks_on_image(rgb_image, detection_result):
     pose_landmarks_list = detection_result.pose_landmarks
     annotated_image = np.copy(rgb_image)
 
-    for idx in range(len(pose_landmarks_list)):
-        pose_landmarks = pose_landmarks_list[idx]
+    pose_landmark_style = vision.drawing_styles.get_default_pose_landmarks_style()
+    pose_connection_style = vision.drawing_utils.DrawingSpec(color=(0, 255, 0), thickness=2)
 
-        # Draw the pose landmarks.
-        pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-        pose_landmarks_proto.landmark.extend([
-            landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in pose_landmarks
-        ])
-        mp.solutions.drawing_utils.draw_landmarks(
-            annotated_image,
-            pose_landmarks_proto,
-            mp.solutions.pose.POSE_CONNECTIONS,
-            mp.solutions.drawing_styles.get_default_pose_landmarks_style())
+    for pose_landmarks in pose_landmarks_list:
+        vision.drawing_utils.draw_landmarks(
+            image=annotated_image,
+            landmark_list=pose_landmarks,
+            connections=vision.PoseLandmarksConnections.POSE_LANDMARKS,
+            landmark_drawing_spec=pose_landmark_style,
+            connection_drawing_spec=pose_connection_style
+        )
+
     return annotated_image
 
 def cleanup():
